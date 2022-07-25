@@ -210,7 +210,7 @@ else
         dependencies: sqlitecpp_deps,
         # override the default options
         override_options: sqlitecpp_opts,
-        # install: true,
+        install: true,
         # API version for SQLiteCpp shared library.
         version: '0',)
 endif
