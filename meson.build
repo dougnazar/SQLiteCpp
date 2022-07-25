@@ -146,7 +146,7 @@ libsqlitecpp = library(
     dependencies: sqlitecpp_deps,
     # override the default options
     override_options: sqlitecpp_opts,
-    # install: true,
+    install: true,
     # API version for SQLiteCpp shared library.
     version: '0',)
 if get_option('SQLITECPP_BUILD_TESTS')
@@ -173,6 +173,9 @@ install_headers(
     'include/SQLiteCpp/Transaction.h',
     'include/SQLiteCpp/VariadicBind.h',
     'include/SQLiteCpp/ExecuteMany.h',
+    'include/SQLiteCpp/Savepoint.h',
+    'include/SQLiteCpp/Utils.h',
+    subdir : 'SQLiteCpp',
 )
 
 sqlitecpp_dep = declare_dependency(
