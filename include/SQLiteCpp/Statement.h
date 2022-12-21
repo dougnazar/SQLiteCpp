@@ -940,6 +940,88 @@ public:
     /// Shared pointer to SQLite Prepared Statement Object
     using TStatementPtr = std::shared_ptr<sqlite3_stmt>;
 
+
+    struct Iterator
+    {
+        using iterator_category = std::input_iterator_tag;
+        using difference_type = std::ptrdiff_t;
+        using value_type = Statement;
+        using pointer = Statement*;  // or also value_type*
+        using reference = Statement&;  // or also value_type&
+
+    public:
+        constexpr Iterator() noexcept
+        {
+        }
+#ifdef __cpp_lib_concepts
+        constexpr Iterator(std::default_sentinel_t) noexcept
+        {
+        }
+#endif
+        explicit Iterator(Statement* stmt) : mStatement(stmt)
+        {
+            if (mStatement && mStatement->isDone())
+                mStatement = nullptr;
+            if (mStatement && !mStatement->hasRow())
+                next();
+        }
+
+        reference operator*() const
+        {
+            return *mStatement;
+        }
+        pointer operator->()
+        {
+            return mStatement;
+        }
+
+        Iterator& operator++()
+        {
+            next();
+            return *this;
+        }
+        Iterator operator++(int)
+        {
+            Iterator tmp = *this; next(); return tmp;
+        }
+
+    private:
+        void next() {
+            if (mStatement && !mStatement->executeStep()) {
+                mStatement = nullptr;
+            }
+        }
+
+        friend bool operator== (const Iterator& a, const Iterator& b) noexcept
+        {
+            return a.mStatement == b.mStatement;
+        };
+#if __cpp_impl_three_way_comparison < 201907L
+        friend bool operator!= (const Iterator& a, const Iterator& b) noexcept
+        {
+            return a.mStatement != b.mStatement;
+        };
+#endif
+#ifdef __cpp_lib_concepts
+        friend bool operator==(const Iterator& a, std::default_sentinel_t) noexcept
+        {
+            return !a.mStatement;
+        }
+#endif
+
+
+        Statement*          mStatement = nullptr;
+    };
+
+    Iterator begin()
+    {
+        return Iterator(this);
+    }
+    Iterator end()
+    {
+        return Iterator();
+    }
+
 private:
     /**
      * @brief Check if a return code equals SQLITE_OK, else throw a SQLite::Exception with the SQLite error message
